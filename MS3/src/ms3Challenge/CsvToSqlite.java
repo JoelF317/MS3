@@ -30,6 +30,7 @@ public class CsvToSqlite {
 		fileToParse = inputFile.getName();
 		reqFilePath.close();
 		
+		
         BufferedReader fileReader = null;
         createNewDb(fileToParse);
          
@@ -49,20 +50,32 @@ public class CsvToSqlite {
             //Create bad records CSV file
             FileWriter badRecords = new FileWriter(fileToParse.subSequence(0, fileToParse.indexOf("."))+"-bad.csv");
             
+            //intialize headers 
+            line = fileReader.readLine();
+            String[] tokens = line.split(DELIMITER);
+            for(String token : tokens) {
+            	badRecords.append(token + ",");
+            	}
+            	badRecords.append(System.lineSeparator());
+            //TODO: headers for Sqlitedb
+            
             
             //Read the file line by line
             while ((line = fileReader.readLine()) != null)
             {
                 //Get all tokens available in line
-                String[] tokens = line.split(DELIMITER);
+                tokens = line.split(DELIMITER);
                 if(tokens.length < 10) {
-                	badRecords.write(line);
+                	for(String token : tokens) {
+                	badRecords.append(token + ",");
+                	}
+                	badRecords.append(System.lineSeparator());
                 	fRecords++;
                 }
                 else {
                 	for(String token : tokens)
                 	{
-                		//Write to SQlite db
+                		//TODO: Write to SQlite db
                 		sRecords++;
                 		
                 	}
@@ -79,8 +92,8 @@ public class CsvToSqlite {
             	//create and write log file
             	FileWriter statLog = new FileWriter(fileToParse.subSequence(0, fileToParse.indexOf("."))+".log");
             	int totRecords = sRecords + fRecords;
-            	statLog.write("# of records received: " + totRecords + "/n" +
-            			"# of records successful: " + sRecords + "/n" +
+            	statLog.write("# of records received: " + totRecords + System.lineSeparator() +
+            			"# of records successful: " + sRecords + System.lineSeparator() +
             			"# of records failed: " + fRecords);
             	
             	fileReader.close();
