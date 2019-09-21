@@ -23,16 +23,19 @@ public class CsvToSqlite {
 		//Get filename from user
 		System.out.println("Please enter the file path");
 		Scanner reqFilePath = new Scanner(System.in);
-		String fileToParse = reqFilePath.nextLine();
-		if(!fileToParse.contains(".csv"))
-			fileToParse += ".csv";
-		File inputFile = new File(fileToParse);
-		fileToParse = inputFile.getName();
+		String filePath = reqFilePath.nextLine();
+		if(!filePath.contains(".csv"))
+			filePath += ".csv";
+		File inputFile = new File(filePath);
+		String fileToParse = inputFile.getName();
 		reqFilePath.close();
 		
 		
         BufferedReader fileReader = null;
-        createNewDb(fileToParse.subSequence(0, fileToParse.indexOf("."))+".db");
+        
+        //create SQLite DB
+        String dbName = fileToParse.subSequence(0, fileToParse.indexOf("."))+".db";
+        createNewDb(dbName);
          
         //Delimiter used in CSV file
         final String DELIMITER = ",";
@@ -45,7 +48,7 @@ public class CsvToSqlite {
             String line = "";
             
             //Create the file reader
-            fileReader = new BufferedReader(new FileReader(inputFile.getPath()));
+            fileReader = new BufferedReader(new FileReader(filePath));
             
             //Create bad records CSV file
             FileWriter badRecords = new FileWriter(fileToParse.subSequence(0, fileToParse.indexOf("."))+"-bad.csv");
@@ -65,7 +68,7 @@ public class CsvToSqlite {
             {
                 //Get all tokens available in line
                 tokens = line.split(DELIMITER);
-                if(tokens.length < 10) {
+                if(tokens.length < 11) {
                 	for(String token : tokens) {
                 	badRecords.append(token + ",");
                 	}
@@ -109,13 +112,13 @@ public class CsvToSqlite {
 
 	public static void createNewDb(String fileName) {
 		 
-        String url = "jdbc:sqlite:C:/sqlite/db/" + fileName;
+        String url = "jdbc:sqlite:" + fileName;
  
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                System.out.println("A new database, " + fileName + ", has been created.");
             }
  
         } catch (SQLException e) {
