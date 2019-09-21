@@ -32,7 +32,7 @@ public class CsvToSqlite {
 		
 		
         BufferedReader fileReader = null;
-        createNewDb(fileToParse);
+        createNewDb(fileToParse.subSequence(0, fileToParse.indexOf("."))+".db");
          
         //Delimiter used in CSV file
         final String DELIMITER = ",";
@@ -109,7 +109,7 @@ public class CsvToSqlite {
 
 	public static void createNewDb(String fileName) {
 		 
-        String url = "jdbc:sqlite:C:/sqlite/" + fileName;
+        String url = "jdbc:sqlite:C:/sqlite/db/" + fileName;
  
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
