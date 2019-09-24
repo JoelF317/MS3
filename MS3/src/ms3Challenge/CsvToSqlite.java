@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 import java.io.*;
-
+import com.opencsv.*;
 
 
 /*this class should extract information from a CSV and 
@@ -32,31 +32,29 @@ public class CsvToSqlite {
 		reqFilePath.close();
 		
 		
-        BufferedReader fileReader = null;
+        
         
         //create SQLite DB
         String dbName = fileToParse.subSequence(0, fileToParse.indexOf("."))+"";
         createNewDb(dbName);
          
-        //Delimiter used in CSV file
-        final String DELIMITER = ",";
         
         //ints to track successful records and failed records
         int sRecords = 0, fRecords = 0;
         
         try
         {
-            String line = "";
+            
             
             //Create the file reader
-            fileReader = new BufferedReader(new FileReader(filePath));
+            CSVReader fileReader = new CSVReader(new FileReader(filePath));
             
             //Create bad records CSV file
             FileWriter badRecords = new FileWriter(fileToParse.subSequence(0, fileToParse.indexOf("."))+"-bad.csv");
             
             //intialize headers 
-            line = fileReader.readLine();
-            String[] tokens = line.split(DELIMITER);
+            
+            String[] tokens = fileReader.readNext();
             for(String token : tokens) {
             	badRecords.append(token + ",");
             	}
@@ -65,29 +63,35 @@ public class CsvToSqlite {
             //Create Table in Sqlitedb
             createDb10ColTable(dbName);
             
+            boolean goodLine = true;
             
             //Read the file line by line
-            while ((line = fileReader.readLine()) != null)
+            while ((tokens = fileReader.readNext()) != null)
             {
-                //Get all tokens available in line
-                tokens = line.split(DELIMITER);
-                if(tokens.length < 11) {
-                	for(String token : tokens) {
-                	badRecords.append(token + ",");
+             
+            	goodLine = true;
+            	for(String token1 : tokens) {
+            		if(token1.equals("")) {
+            		for(String token2 : tokens) {
+                	badRecords.append(token2 + ",");
                 	}
                 	badRecords.append(System.lineSeparator());
                 	fRecords++;
-                }
-                else {
-                	
-                		//Write to SQlite db
+                	goodLine = false;
+                	break;
+            		}
+            	}
+                if(goodLine) {
+                	//Write to SQlite db
                 		insertDb10Col(dbName, tokens);
                 		sRecords++;
-                		
-                	
                 }
+                	
+                
+                
             }
             badRecords.close();
+        	fileReader.close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -102,7 +106,7 @@ public class CsvToSqlite {
             			"# of records successful: " + sRecords + System.lineSeparator() +
             			"# of records failed: " + fRecords);
             	
-            	fileReader.close();
+
                 statLog.close();
                 System.out.println("The process is complete.");
                 
@@ -163,7 +167,15 @@ public class CsvToSqlite {
 
 	public static void insertDb10Col(String fileName, String[] entry) {
 		String url = "jdbc:sqlite:" + fileName + ".db";
-		 
+		 int i = 0;
+		while(i < 10) {
+			if(entry[i].contains("'")) {
+				entry[i] = entry[i].replaceAll("'", "''");
+				System.out.println(entry[i]);
+			}
+			i++;
+		}
+		
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 Statement stmt = conn.createStatement();
@@ -181,7 +193,7 @@ public class CsvToSqlite {
                 stmt.executeUpdate(cmd);
                 stmt.close();
                 conn.close();
-                System.out.println("The entry " + entry[0] + " has been added.");
+                //System.out.println("The entry " + entry[0] + " has been added.");
             }
  
         } catch (SQLException e) {
