@@ -1,0 +1,7 @@
+# MS3
+
+  The purpose of this repo is to provide an application that consumes a CSV (designed to represent a table with ten columns and an arbitrary number of rows), parses the data, and inserts it into an SQLite database, taking all entries that do not match the 10 column format and writing them to another CSV file and logging the statistics. The only thing needed to run the application is the file path of the target CSV file to be consumed (for which the user is prompted at the beginning of runtime). 
+  
+  As for design choices, I tried to be thorough, while leveraging certain patterns in the consumable CSV to reduce complexity. I inserted some logic to handle complex data which includes single quotes, double quotes, and commas. In some cases, these are abstract enough to handle these complexities wherever they arise in the target CSV. In others, notably the handling of the double quoted data and single quoted data, I used the fact that only the 5th and 9th columns respectively used this formatting to save time and complexity. 
+  
+  There were also several assumptions made with regard to details omitted from the original specs. The files created by the application are stored in the default directory. Bad records with extra rows were written to the designated file as having only one extra row so that the user may note the excess and consult the original CSV without the potential of unnecessarily bogging down the program if there are entries with a great deal of excess data. 
