@@ -73,8 +73,14 @@ public class CsvToSqlite {
             	for(String token1 : tokens) {
             		if(token1.equals("")) {
             		for(String token2 : tokens) {
-                	badRecords.append(token2 + ",");
-                	}
+                	if (tokens.length>4) {
+						if (token2.equals(tokens[4]))
+							badRecords.append("\"" + tokens[4] + "\"" + ",");
+						else
+							badRecords.append(token2 + ",");
+					}
+            		}
+            		
                 	badRecords.append(System.lineSeparator());
                 	fRecords++;
                 	goodLine = false;
@@ -171,7 +177,6 @@ public class CsvToSqlite {
 		while(i < 10) {
 			if(entry[i].contains("'")) {
 				entry[i] = entry[i].replaceAll("'", "''");
-				System.out.println(entry[i]);
 			}
 			i++;
 		}
